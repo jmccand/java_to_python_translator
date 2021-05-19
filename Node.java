@@ -16,9 +16,14 @@ public class Node {
   call
   reassignment
   declaration
-  value
-  access
   space-call
+  String
+  char
+  boolean
+  int
+  double
+  variable
+  I REALLY DON'T KNOW WHAT THIS IS
   */
 
   private String type;
@@ -48,6 +53,7 @@ public class Node {
   }
 
   public void recurse() {
+    //System.out.println("recursing");
     int index = 0;
     switch (this.type) {
       case "program": {
@@ -193,14 +199,16 @@ public class Node {
         break;
       }
       case "declaration": {
-        this.offspring.add(new Node("value", this, self.subList(3, self.size())));
+        //System.out.println("declaration: " + self.subList(3, self.size()));
+        this.offspring.add(this.subline(3, self.size() - 1));
         break;
       }
       case "reassignment": {
-        this.offspring.add(new Node("value", this, self.subList(2, self.size())));
+        //System.out.println("reassignment: " + self.subList(2, self.size()));
+        this.offspring.add(this.subline(2, self.size() - 1));
         break;
       }
-      case "call": {
+      /*case "call": {
         while (!self.get(index).equals("(")) {
           index++;
         }
@@ -209,7 +217,8 @@ public class Node {
         index++;
         while (parentheses > 0) {
           if (self.get(index).equals(",")) {
-            this.offspring.add(new Node("value", this, self.subList(lastComma + 1, index)));
+            System.out.println("calling subline");
+            this.offspring.add(this.subline(lastComma + 1, index));
             lastComma = index;
           }
           if (self.get(index).equals("(")) {
@@ -218,7 +227,8 @@ public class Node {
           else if (self.get(index).equals(")")) {
             parentheses--;
             if (parentheses == 0 && lastComma + 1 < index) {
-              this.offspring.add(new Node("value", this, self.subList(lastComma + 1, index)));
+              System.out.println("calling subline");
+              this.offspring.add(this.subline(lastComma + 1, index));
               lastComma = index;
             }
           }
@@ -226,10 +236,37 @@ public class Node {
         }
         break;
       }
+      /*case "combination": {
+        String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
+        int lastSplit = index;
+        while (index < self.size()) {
+          if (self.get(index).equals("(")) {
+            index++;
+            int parentheses = 1;
+            while (parentheses > 0) {
+              if (self.get(index).equals("(")) {
+                parentheses++;
+              }
+              else if (self.get(index).equals(")")) {
+                parentheses--;
+              }
+              index++;
+            }
+          }
+          else if (in(combinations, self.get(index))) {
+            this.offspring.add(this.subline(lastSplit, index));
+            index++;
+            lastSplit = index;
+          }
+        }
+        break;
+      }
+      */
     }
   }
 
   private Node subline(int from, int to) {
+    //System.out.println("subline");
     String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
     int index;
     while (self.get(from).equals("(") && self.get(to - 1).equals(")")) {
@@ -255,6 +292,9 @@ public class Node {
         else if (in(combinations, self.get(index))) {
           return new Node("combination", this, self.subList(from, to));
         }
+        else {
+          index++;
+        }
       }
       if (self.get(to - 1).equals(")")) {
         return new Node("call", this, self.subList(from, to));
@@ -265,13 +305,27 @@ public class Node {
       if (self.get(from).substring(0, 1).equals("\"")) {
         return new Node("String", this, self.subList(from, to));
       }
+      else if (self.get(from).length() == 3 && self.get(from).substring(0, 1).equals("'")) {
+        return new Node("char", this, self.subList(from, to));
+      }
       else if (self.get(from).equals("true") || self.get(from).equals("false")) {
         return new Node("boolean", this, self.subList(from, to));
+      }
+      else if (isInt(self.get(from))) {
+        return new Node("int", this, self.subList(from, to));
+      }
+      else if (isDouble(self.get(from))) {
+        return new Node("double", this, self.subList(from, to));
+      }
+      else {
+        return new Node("variable", this, self.subList(from, to));
       }
     }
     else {
       System.out.println("Unexpected entry of length 2: " + self.subList(from, to));
     }
+    //System.out.print(self.subList(from, to) + "   :   ");
+    return new Node("I REALLY DON'T KNOW WHAT THIS IS", this, self.subList(from, to));
   }
 
   private int braces(int start) {
@@ -289,7 +343,44 @@ public class Node {
     return index;
   }
 
+  private static boolean isInt(String og) {
+    int start = 0;
+    if (og.substring(0, 1).equals("-")) {
+      start++;
+    }
+    for (int index = start; index < og.length(); index++) {
+      char thisChar = og.charAt(index);
+      int ascii = (int)thisChar;
+      if (!(ascii >= 48 && ascii <= 57)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private static boolean isDouble(String og) {
+    boolean period = false;
+    int start = 0;
+    if (og.substring(0, 1).equals("-")) {
+      start++;
+    }
+    for (int index = start; index < og.length(); index++) {
+      char thisChar = og.charAt(index);
+      int ascii = (int)thisChar;
+      if (!(ascii >= 48 && ascii <= 57)) {
+        if (thisChar == '.' && !period) {
+          period = true;
+        }
+        else {
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
   private static boolean in(String[] full, String value) {
+    //System.out.println("in - " + full[0]);
     for (String thisValue : full) {
       if (thisValue.equals(value)) {
         return true;
