@@ -173,7 +173,6 @@ public class Node {
             }
           }
           else {
-            index++;
             if (startLine + 1 < index) {
               String[] declarations = {"=", "++", "--", "+=", "-=", "*=", "/="};
               String[] types = {"int", "boolean", "char", "String", "double"};
@@ -193,22 +192,27 @@ public class Node {
                 }
               }
             }
+            index++;
             //this.offspring.add(new Node("newline", this, self.subList(index, index + 1)));
           }
         }
         break;
       }
       case "declaration": {
+        System.out.println("declaration: " + self);
         //System.out.println("declaration: " + self.subList(3, self.size()));
-        this.offspring.add(this.subline(3, self.size() - 1));
+        if (self.size() > 3) {
+          this.offspring.add(this.subline(3, self.size() - 1));
+        }
         break;
       }
       case "reassignment": {
+        System.out.println("reassignment: " + self);
         //System.out.println("reassignment: " + self.subList(2, self.size()));
         this.offspring.add(this.subline(2, self.size() - 1));
         break;
       }
-      /*case "call": {
+      case "call": {
         while (!self.get(index).equals("(")) {
           index++;
         }
@@ -236,7 +240,8 @@ public class Node {
         }
         break;
       }
-      /*case "combination": {
+      /*
+      case "combination": {
         String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
         int lastSplit = index;
         while (index < self.size()) {
