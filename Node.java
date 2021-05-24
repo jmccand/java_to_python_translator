@@ -240,7 +240,6 @@ public class Node {
         }
         break;
       }
-      /*
       case "combination": {
         String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
         int lastSplit = index;
@@ -263,10 +262,12 @@ public class Node {
             index++;
             lastSplit = index;
           }
+	  else {
+	    index++;
+	  }
         }
         break;
       }
-      */
     }
   }
 
