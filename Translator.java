@@ -8,7 +8,7 @@ import java.util.ArrayList;
 
 public class Translator {
 
-    private static String[] twoCharExpressions = {"==", "+=", "-=", "*=", "/=", "<=", ">=", "||", "&&", "++", "--"};
+    private static String[] twoCharExpressions = {"==", "!=", "+=", "-=", "*=", "/=", "<=", ">=", "||", "&&", "++", "--"};
 
     private File ogJava;
     private String newPython;
@@ -94,6 +94,7 @@ public class Translator {
 	    case "-":
 	    case "*":
 	    case "/":
+	    case ",":
 		return false;
 	    }
 	}
