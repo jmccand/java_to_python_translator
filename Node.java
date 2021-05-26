@@ -224,19 +224,35 @@ public class Node {
 		    //System.out.println("calling subline");
 		    this.offspring.add(this.subline(lastComma + 1, index));
 		    lastComma = index;
+		    index++;
 		}
-		if (self.get(index).equals("(")) {
-		    parentheses++;
-		}
-		else if (self.get(index).equals(")")) {
-		    parentheses--;
-		    if (parentheses == 0 && lastComma + 1 < index) {
-			//System.out.println("calling subline");
-			this.offspring.add(this.subline(lastComma + 1, index));
-			lastComma = index;
+		else {
+		    if (self.get(index).equals("(")) {
+			int internalParentheses = 1;
+			index++;
+			while (internalParentheses > 0) {
+			    if (self.get(index).equals("(")) {
+				internalParentheses++;
+			    }
+			    else if (self.get(index).equals(")")) {
+				internalParentheses--;
+			    }
+			    index++;
+			}
+		    }
+		    else if (self.get(index).equals(")")) {
+			parentheses--;
+			if (parentheses == 0 && lastComma + 1 < index) {
+			    //System.out.println("calling subline");
+			    this.offspring.add(this.subline(lastComma + 1, index));
+			    lastComma = index;
+			}
+			index++;
+		    }
+		    else {
+			index++;
 		    }
 		}
-		index++;
 	    }
 	    break;
 	}
@@ -248,6 +264,9 @@ public class Node {
 		    index++;
 		    int parentheses = 1;
 		    while (parentheses > 0) {
+			if (index == self.size()) {
+			    System.out.println("FOUND IT!!! " + self);
+			}
 			if (self.get(index).equals("(")) {
 			    parentheses++;
 			}
