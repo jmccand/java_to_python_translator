@@ -287,21 +287,47 @@ public class Node {
 	    }
 	    break;
 	}
+	case "typecast": {
+	    while (!self.get(index).equals(")")) {
+		index++;
+	    }
+	    index++;
+	    this.offspring.add(this.subline(index, self.size()));
+	}
 	}
     }
 
     private Node subline(int from, int to) {
 	//System.out.println("subline");
-	String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
+	String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
 	int index;
-	while (self.get(from).equals("(") && self.get(to - 1).equals(")")) {
-	    from++;
-	    to--;
+	boolean stripped = false;
+	while (stripped) {
+	    if (!(self.get(from).equals("(") && self.get(to - 1).equals(")"))) {
+		stripped = true;
+	    }
+	    else {
+		index = from + 1;
+		int parentheses = 1;
+		while (parentheses > 0) {
+		    if (self.get(index).equals("(")) {
+			parentheses++;
+		    }
+		    else if (self.get(index).equals(")")) {
+			parentheses--;
+		    }
+		    index++;
+		}
+		if (index == to) {
+		    from++;
+		    to--;
+		}
+		else {
+		    stripped = true;
+		}
+	    }
 	}
 	if (from + 2 < to) {
-	    if (self.get(from).equals("new")) {
-		return new Node("new", this, self.subList(from, to));
-	    }
 	    index = from;
 	    while (index < to) {
 		if (self.get(index).equals("(")) {
@@ -324,7 +350,16 @@ public class Node {
 		    index++;
 		}
 	    }
-	    if (self.get(to - 1).equals(")")) {
+	    if (self.get(from).equals("new")) {
+		return new Node("new", this, self.subList(from, to));
+	    }
+	    else if (self.get(from).equals("(")) {
+		String[] types = {"int", "boolean", "char", "String", "double"};
+		if (in(types, self.get(from + 1))) {
+		    return new Node("typecast", this, self.subList(from, to));
+		    }
+	    }
+	    else if (self.get(to - 1).equals(")")) {
 		return new Node("call", this, self.subList(from, to));
 	    }
 	}
