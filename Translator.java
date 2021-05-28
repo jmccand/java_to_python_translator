@@ -148,8 +148,8 @@ public class Translator {
 	    }
 	    if (!larger.equals(" ")) {
 		cleaned.add(larger);
-		larger = "";
 	    }
+	    larger = "";
 	}
 	if (index < original.size()) {
 	    cleaned.add(original.get(index));
