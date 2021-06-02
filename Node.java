@@ -180,7 +180,7 @@ public class Node {
 			if (in(declarations, self.get(startLine + 1))) {
 			    this.offspring.add(new Node("reassignment", this, self.subList(startLine, index)));
 			}
-			else if (in(declarations, self.get(startLine + 2)) || in(types, self.get(startLine))) {
+			else if (self.get(startLine + 2).equals("=") || in(types, self.get(startLine))) {
 			    this.offspring.add(new Node("declaration", this, self.subList(startLine, index)));
 			}
 			else {
@@ -209,7 +209,9 @@ public class Node {
 	case "reassignment": {
 	    //System.out.println("reassignment: " + self);
 	    //System.out.println("reassignment: " + self.subList(2, self.size()));
-	    this.offspring.add(this.subline(2, self.size() - 1));
+	    if (self.size() > 3) {
+		this.offspring.add(this.subline(2, self.size() - 1));
+	    }
 	    break;
 	}
 	case "call": {
@@ -302,7 +304,7 @@ public class Node {
 	String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
 	int index;
 	boolean stripped = false;
-	while (stripped) {
+	while (!stripped) {
 	    if (!(self.get(from).equals("(") && self.get(to - 1).equals(")"))) {
 		stripped = true;
 	    }
@@ -326,6 +328,9 @@ public class Node {
 		    stripped = true;
 		}
 	    }
+	}
+	if (from == to) {
+	    System.out.println("FOUND IT!!! self is: " + self + "\nAnd the indexes are " + from + " and " + to);
 	}
 	if (from + 2 < to) {
 	    index = from;
