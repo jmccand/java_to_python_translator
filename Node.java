@@ -396,6 +396,46 @@ public class Node {
 	return new Node("I REALLY DON'T KNOW WHAT THIS IS", this, self.subList(from, to));
     }
 
+    public void translate(ArrayList<String> translated) {
+	switch (this.type) {
+	case "program": {
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
+	}
+	case "comment": {
+	    translated.add(self.get(0));
+	    translated.add("\n");
+	}
+	case "import": {
+	    switch (self.get(1)) {
+	    }
+	}
+	case "class": {
+	    translated.add("\nclass");
+	    translated.add(self.get(2));
+	    translated.add(":\n");
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
+	}
+	case "attribute": {
+	}
+	case "constructor": {
+	    translated.add("\ndef __init__(");
+	    int index = 4;
+	    while (!self.get(index - 1).equals(")")) {
+		translated.add(self.get(index));
+		index += 2;
+	    }
+	    translated.add("):\n");
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
+	}
+	}
+    }
+
     private int braces(int start) {
 	int index = start;
 	int count = 1;
