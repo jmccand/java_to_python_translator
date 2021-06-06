@@ -28,22 +28,26 @@ public class Node {
 
     private String type;
 
+    private int indent;
+    
     private Node parent;
     private List<String> self;
     private List<Node> offspring = new ArrayList<Node>();
 
-    public Node(String t, List<String> s) {
+    public Node(String t, List<String> s, int i) {
         this.type = t;
         this.self = s;
+	this.indent = i;
         this.recurse();
         this.trace(0);
         //System.out.println(this);
     }
 
-    public Node(String t, Node p, List<String> s) {
+    public Node(String t, Node p, List<String> s, int i) {
         this.type = t;
         this.parent = p;
         this.self = s;
+	this.indent = i;
         this.recurse();
         //System.out.println(this);
     }
@@ -62,14 +66,14 @@ public class Node {
 		    switch (self.get(index).substring(0, 2)) {
 		    case "/*":
 		    case "//": {
-			this.offspring.add(new Node("comment", this, self.subList(index, index + 1)));
+			this.offspring.add(new Node("comment", this, self.subList(index, index + 1), 0));
 			index++;
 			break;
 		    }
 		    default: {
 			switch (self.get(index)) {
 			case "import": {
-			    this.offspring.add(new Node("import", this, self.subList(index, index + 3)));
+			    this.offspring.add(new Node("import", this, self.subList(index, index + 3), 0));
 			    index += 3;
 			    break;
 			}
@@ -80,7 +84,7 @@ public class Node {
 			    }
 			    index++;
 			    index = this.braces(index);
-			    this.offspring.add(new Node("class", this, self.subList(startIndex, index)));
+			    this.offspring.add(new Node("class", this, self.subList(startIndex, index), 0));
 			    break;
 			}
 			default: {
@@ -110,7 +114,7 @@ public class Node {
 			}
 			index++;
 			index = this.braces(index);
-			this.offspring.add(new Node("constructor", this, self.subList(startIndex, index)));
+			this.offspring.add(new Node("constructor", this, self.subList(startIndex, index), 1));
 		    }
 		    else {
 			int isStatic = 0;
@@ -124,7 +128,7 @@ public class Node {
 			    }
 			    index++;
 			    index = this.braces(index);
-			    this.offspring.add(new Node("method", this, self.subList(startIndex, index)));
+			    this.offspring.add(new Node("method", this, self.subList(startIndex, index), 1));
 			}
 			else {
 			    int startIndex = index;
@@ -132,7 +136,7 @@ public class Node {
 				index++;
 			    }
 			    index++;
-			    this.offspring.add(new Node("attribute", this, self.subList(startIndex, index)));
+			    this.offspring.add(new Node("attribute", this, self.subList(startIndex, index), 1));
 			}
 		    }
 		}
@@ -166,10 +170,10 @@ public class Node {
 		    index++;
 		    index = this.braces(index);
 		    if (self.get(startLine + 1).equals("if")) {
-			this.offspring.add(new Node("else if", this, self.subList(startLine, index)));
+			this.offspring.add(new Node("else if", this, self.subList(startLine, index), this.indent + 1));
 		    }
 		    else {
-			this.offspring.add(new Node(self.get(startLine), this, self.subList(startLine, index)));
+			this.offspring.add(new Node(self.get(startLine), this, self.subList(startLine, index), this.indent + 1));
 		    }
 		}
 		else {
@@ -178,17 +182,17 @@ public class Node {
 			String[] types = {"int", "boolean", "char", "String", "double"};
 			String[] spaced_methods = {"return"};
 			if (in(declarations, self.get(startLine + 1))) {
-			    this.offspring.add(new Node("reassignment", this, self.subList(startLine, index)));
+			    this.offspring.add(new Node("reassignment", this, self.subList(startLine, index), this.indent + 1));
 			}
 			else if (self.get(startLine + 2).equals("=") || in(types, self.get(startLine))) {
-			    this.offspring.add(new Node("declaration", this, self.subList(startLine, index)));
+			    this.offspring.add(new Node("declaration", this, self.subList(startLine, index), this.indent + 1));
 			}
 			else {
 			    if (in(spaced_methods, self.get(startLine))) {
-				this.offspring.add(new Node("space-call", this, self.subList(startLine, index)));
+				this.offspring.add(new Node("space-call", this, self.subList(startLine, index), this.indent + 1));
 			    }
 			    else {
-				this.offspring.add(new Node("call", this, self.subList(startLine, index)));
+				this.offspring.add(new Node("call", this, self.subList(startLine, index), this.indent + 1));
 			    }
 			}
 		    }
@@ -349,51 +353,51 @@ public class Node {
 		    }
 		}
 		else if (in(combinations, self.get(index))) {
-		    return new Node("combination", this, self.subList(from, to));
+		    return new Node("combination", this, self.subList(from, to), this.indent);
 		}
 		else {
 		    index++;
 		}
 	    }
 	    if (self.get(from).equals("new")) {
-		return new Node("new", this, self.subList(from, to));
+		return new Node("new", this, self.subList(from, to), this.indent);
 	    }
 	    else if (self.get(from).equals("(")) {
 		String[] types = {"int", "boolean", "char", "String", "double"};
 		if (in(types, self.get(from + 1))) {
-		    return new Node("typecast", this, self.subList(from, to));
+		    return new Node("typecast", this, self.subList(from, to), this.indent);
 		    }
 	    }
 	    else if (self.get(to - 1).equals(")")) {
-		return new Node("call", this, self.subList(from, to));
+		return new Node("call", this, self.subList(from, to), this.indent);
 	    }
 	}
 	else if (from + 1 == to) {
 	    //String[] types = {"int", "boolean", "char", "String", "double"};
 	    if (self.get(from).substring(0, 1).equals("\"")) {
-		return new Node("String", this, self.subList(from, to));
+		return new Node("String", this, self.subList(from, to), this.indent);
 	    }
 	    else if (self.get(from).length() == 3 && self.get(from).substring(0, 1).equals("'")) {
-		return new Node("char", this, self.subList(from, to));
+		return new Node("char", this, self.subList(from, to), this.indent);
 	    }
 	    else if (self.get(from).equals("true") || self.get(from).equals("false")) {
-		return new Node("boolean", this, self.subList(from, to));
+		return new Node("boolean", this, self.subList(from, to), this.indent);
 	    }
 	    else if (isInt(self.get(from))) {
-		return new Node("int", this, self.subList(from, to));
+		return new Node("int", this, self.subList(from, to), this.indent);
 	    }
 	    else if (isDouble(self.get(from))) {
-		return new Node("double", this, self.subList(from, to));
+		return new Node("double", this, self.subList(from, to), this.indent);
 	    }
 	    else {
-		return new Node("variable", this, self.subList(from, to));
+		return new Node("variable", this, self.subList(from, to), this.indent);
 	    }
 	}
 	else {
 	    //System.out.println("Unexpected entry of length 2: " + self.subList(from, to));
 	}
 	System.out.println(self.subList(from, to) + "   :   I REALLY DON'T KNOW WHAT THIS IS");
-	return new Node("I REALLY DON'T KNOW WHAT THIS IS", this, self.subList(from, to));
+	return new Node("I REALLY DON'T KNOW WHAT THIS IS", this, self.subList(from, to), this.indent);
     }
 
     public void translate(ArrayList<String> translated) {
@@ -424,16 +428,32 @@ public class Node {
 	case "constructor": {
 	    translated.add("\ndef __init__(");
 	    int index = 4;
-	    while (!self.get(index - 1).equals(")")) {
+	    while (!self.get(index - 2).equals(")")) {
 		translated.add(self.get(index));
-		index += 2;
+		index += 3;
 	    }
 	    translated.add("):\n");
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
 	}
+	case "reassignment": {
+	    translated.add(this.doIndent());
+	    translated.add(self.get(0));
+	    translated.add(" = ");
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
 	}
+	}
+    }
+
+    private String doIndent() {
+	String total = "";
+	for (int index = 0; index < this.indent; index++) {
+	    total += "  ";
+	}
+	return total;
     }
 
     private int braces(int start) {
