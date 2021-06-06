@@ -38,7 +38,7 @@ public class Translator {
 		lexed.add("\n");
 	    }
 	    lexed = clean(lexed);
-	    Node program = new Node("program", lexed);
+	    Node program = new Node("program", lexed, 0);
 	    write(lexed);
 	}
 	catch (FileNotFoundException ex) {
