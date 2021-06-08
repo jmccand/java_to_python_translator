@@ -412,7 +412,18 @@ public class Node {
 	}
 	case "comment": {
 	    //System.out.println("COMMENT:\n" + self);
-	    translated.add(self.get(0));
+	    String pythonified = "";
+	    String remaining = self.get(0).substring(2);
+	    while (remaining.indexOf("\n") != -1) {
+		pythonified += "#  ";
+		pythonified += remaining.substring(0, remaining.indexOf("\n"));
+		pythonified += "\n";
+		remaining = remaining.substring(remaining.indexOf("\n") + 1);
+	    }
+	    if (remaining.length() > 2) {
+		pythonified += remaining.substring(0, remaining.length() - 2);
+	    }
+	    translated.add(pythonified);
 	    translated.add("\n");
 	    break;
 	}
