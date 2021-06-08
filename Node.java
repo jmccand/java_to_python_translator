@@ -84,6 +84,7 @@ public class Node {
 			    }
 			    index++;
 			    index = this.braces(index);
+			    //System.out.println("\n\nFound the class:\n" + self.subList(startIndex, index));
 			    this.offspring.add(new Node("class", this, self.subList(startIndex, index), 0));
 			    break;
 			}
@@ -400,42 +401,57 @@ public class Node {
 	return new Node("I REALLY DON'T KNOW WHAT THIS IS", this, self.subList(from, to), this.indent);
     }
 
-    public void translate(ArrayList<String> translated) {
+    public void translate(List<String> translated) {
 	switch (this.type) {
 	case "program": {
+	    //System.out.println("PROGRAM:\n" + self);
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
+	    break;
 	}
 	case "comment": {
+	    //System.out.println("COMMENT:\n" + self);
 	    translated.add(self.get(0));
 	    translated.add("\n");
+	    break;
 	}
 	case "import": {
-	    switch (self.get(1)) {
-	    }
+	    //System.out.println("IMPORT:\n" + self);
+	    //switch (self.get(1)) {
+	    //}
+	    break;
 	}
 	case "class": {
-	    translated.add("\nclass");
+	    //System.out.println("CLASS:\n" + self);
+	    translated.add("\nclass ");
 	    translated.add(self.get(2));
 	    translated.add(":\n");
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
+	    translated.add("\n");
+	    break;
 	}
 	case "attribute": {
+	    break;
 	}
 	case "constructor": {
-	    translated.add("\ndef __init__(");
+	    System.out.println("CONSTRUCTOR:\n" + self);
+	    translated.add("\n  def __init__(");
 	    int index = 4;
-	    while (!self.get(index - 2).equals(")")) {
-		translated.add(self.get(index));
-		index += 3;
+	    if (!self.get(index).equals("{")) {
+		while (!self.get(index - 2).equals(")")) {
+		    translated.add(self.get(index));
+		    index += 3;
+		}
 	    }
 	    translated.add("):\n");
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
+	    translated.add("\n");
+	    break;
 	}
 	case "reassignment": {
 	    translated.add(this.doIndent());
@@ -444,6 +460,11 @@ public class Node {
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
+	    translated.add("\n");
+	    break;
+	}
+	case "new": {
+	    break;
 	}
 	}
     }
@@ -539,7 +560,7 @@ public class Node {
 	for (int repeat = 0; repeat < generation; repeat++) {
 	    spaces += "  ";
 	}
-	System.out.println(spaces + this.type);
+	System.out.println(spaces + this.type/* + "   " + self.get(0)*/);
 	for (Node child : this.offspring) {
 	    child.trace(generation + 1);
 	}
