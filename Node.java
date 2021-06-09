@@ -481,7 +481,19 @@ public class Node {
 	}
 	case "reassignment": {
 	    translated.add(this.doIndent());
-	    translated.add(self.get(0));
+	    switch (this.identify(self.get(0))) {
+	    case 0: {
+		translated.add("self." + self.get(0));
+		break;
+	    }
+	    case 1: {
+		translated.add(this.className() + "." + self.get(0));
+		break;
+	    }
+	    case 2: {
+		translated.add(self.get(0));
+	    }
+	    }
 	    translated.add(" = ");
 	    for (Node child : this.offspring) {
 		child.translate(translated);
@@ -490,6 +502,12 @@ public class Node {
 	    break;
 	}
 	case "new": {
+	    switch (self.get(1)) {
+	    default: {
+		translated.add("'" + self.get(1) + "'");
+		break;
+	    }
+	    }
 	    break;
 	}
 	}
@@ -520,6 +538,35 @@ public class Node {
 	else {
 	    thisNode.variables.add(variable);
 	}
+    }
+
+    private int identify(String variable) {
+	Node thisNode = this.parent;
+	while (thisNode.variables.indexOf(variable) == -1 && !thisNode.type.equals("class")) {
+	    thisNode = thisNode.parent;
+	}
+	if (thisNode.type.equals("class")) {
+	    if (thisNode.variables.indexOf("attribute " + variable) != -1) {
+		return 0;
+	    }
+	    else {
+		if (thisNode.variables.indexOf("static " + variable) == -1) {
+		    System.out.println("SKETCHY VARIABLE: " + variable);
+		}
+		return 1;
+	    }
+	}
+	else {
+	    return 2;
+	}
+    }
+
+    private String className() {
+	Node thisNode = this.parent;
+	while (!thisNode.type.equals("class")) {
+	    thisNode = thisNode.parent;
+	}
+	return thisNode.self.get(2);
     }
 
     private int braces(int start) {
