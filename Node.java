@@ -460,6 +460,9 @@ public class Node {
 	    break;
 	}
 	case "attribute": {
+	    if (self.get(1).equals("static")) {
+		translated.add("\n" + self.get(3) + "\n");
+	    }
 	    break;
 	}
 	case "constructor": {
@@ -467,7 +470,10 @@ public class Node {
 	    translated.add("\n  def __init__(");
 	    int index = 4;
 	    if (!self.get(index).equals("{")) {
+		translated.add(self.get(index));
+		index += 3;
 		while (!self.get(index - 2).equals(")")) {
+		    translated.add(", ");
 		    translated.add(self.get(index));
 		    index += 3;
 		}
@@ -508,6 +514,24 @@ public class Node {
 		break;
 	    }
 	    }
+	    break;
+	}
+	case "call": {
+	    if (this.indent != this.parent.indent) {
+		translated.add(doIndent());
+	    }
+	    translated.add(self.get(0) + "(");
+	    int index = 2;
+	    if (!self.get(index).equals(")")) {
+		translated.add(self.get(index));
+		index += 2;
+		while (!self.get(index - 1).equals(")")) {
+		    translated.add(", ");
+		    translated.add(self.get(index));
+		    index += 2;
+		}
+	    }
+	    translated.add(")");
 	    break;
 	}
 	}
