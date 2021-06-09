@@ -34,6 +34,8 @@ public class Node {
     private List<String> self;
     private List<Node> offspring = new ArrayList<Node>();
 
+    private List<String> variables = new ArrayList<String>();
+
     public Node(String t, List<String> s, int i) {
         this.type = t;
         this.self = s;
@@ -209,6 +211,7 @@ public class Node {
 	    if (self.size() > 3) {
 		this.offspring.add(this.subline(3, self.size() - 1));
 	    }
+	    this.addVariable(self.get(1));
 	    break;
 	}
 	case "reassignment": {
@@ -300,6 +303,18 @@ public class Node {
 	    }
 	    index++;
 	    this.offspring.add(this.subline(index, self.size()));
+	    break;
+	}
+	case "attribute": {
+	    String variable;
+	    if (self.get(1).equals("static")) {
+		variable = self.get(3);
+	    }
+	    else {
+		variable = self.get(2);
+	    }
+	    this.addVariable(variable);
+	    break;
 	}
 	}
     }
@@ -486,6 +501,25 @@ public class Node {
 	    total += "  ";
 	}
 	return total;
+    }
+
+    private void addVariable(String variable) {
+	Node thisNode = this.parent;
+	String[] storages = {"class", "constructor", "method", "for", "if", "else if", "else", "do", "while", "try", "catch"};
+	while (!in(storages, thisNode.type)) {
+	    thisNode = thisNode.parent;
+	}
+	if (thisNode.type.equals("class")) {
+	    if (self.get(1).equals("static")) {
+		thisNode.variables.add("static " + variable);
+	    }
+	    else {
+		thisNode.variables.add("attribute " + variable);
+	    }
+	}
+	else {
+	    thisNode.variables.add(variable);
+	}
     }
 
     private int braces(int start) {
