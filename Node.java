@@ -464,14 +464,14 @@ public class Node {
 	    break;
 	}
 	case "attribute": {
-	    System.out.println("ATTRIBUTE:\n" + self);
+	    //System.out.println("ATTRIBUTE:\n" + self);
 	    if (self.get(1).equals("static")) {
 		translated.add("\n  " + self.get(3) + " = None\n");
 	    }
 	    break;
 	}
 	case "constructor": {
-	    System.out.println("CONSTRUCTOR:\n" + self);
+	    //System.out.println("CONSTRUCTOR:\n" + self);
 	    translated.add("\n  def __init__(");
 	    int index = 4;
 	    if (!self.get(index).equals("{")) {
@@ -487,7 +487,33 @@ public class Node {
 	    for (Node child : this.offspring) {
 		child.translate(translated);
 	    }
-	    translated.add("\n");
+	    break;
+	}
+	case "method": {
+	    //System.out.println("METHOD:\n" + self);
+	    int index;
+	    if (self.get(1).equals("static")) {
+		translated.add("\n  def " + self.get(3) + "(");
+		index = 3;
+	    }
+	    else {
+		translated.add("\n  def " + self.get(2) + "(self, ");
+		index = 2;
+	    }
+	    index += 3;
+	    if (!self.get(index).equals("{")) {
+		translated.add(self.get(index));
+		index += 3;
+		while (!self.get(index - 2).equals(")")) {
+		    translated.add(", ");
+		    translated.add(self.get(index));
+		    index += 3;
+		}
+	    }
+	    translated.add("):\n");
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
 	    break;
 	}
 	case "reassignment": {
@@ -537,6 +563,9 @@ public class Node {
 		}
 	    }
 	    translated.add(")");
+	    if (this.indent != this.parent.indent) {
+		translated.add("\n");
+	    }
 	    break;
 	}
 	}
