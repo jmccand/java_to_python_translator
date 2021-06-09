@@ -108,6 +108,10 @@ public class Node {
 	    break;
 	}
 	case "class": {
+	    while (!self.get(index).equals("{")) {
+		index++;
+	    }
+	    index++;
 	    while (index < self.size()) {
 		if (self.get(index).equals("public") || self.get(index).equals("private")) {
 		    if (self.get(index + 1).equals(self.get(2))) {
@@ -460,8 +464,9 @@ public class Node {
 	    break;
 	}
 	case "attribute": {
+	    System.out.println("ATTRIBUTE:\n" + self);
 	    if (self.get(1).equals("static")) {
-		translated.add("\n" + self.get(3) + "\n");
+		translated.add("\n  " + self.get(3) + " = None\n");
 	    }
 	    break;
 	}
