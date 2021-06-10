@@ -299,6 +299,7 @@ public class Node {
 		    index++;
 		}
 	    }
+	    this.offspring.add(this.subline(lastSplit, index));
 	    break;
 	}
 	case "typecast": {
