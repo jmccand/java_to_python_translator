@@ -594,22 +594,12 @@ public class Node {
 	}
 	case "combination": {
 	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
-	    int selfIndex = 0;
-	    int offIndex = 0;
-	    if (self.get(0).equals("choice")) {
-		System.out.print("offspring of critical: " + this.offspring);
-	    }
-	    while (selfIndex < self.size() && offIndex < this.offspring.size()) {
-		if (!in(combinations, self.get(selfIndex))) {
-		    if (offIndex > 0 && offIndex < this.offspring.size() - 1) {
-			translated.add(" ");
-		    }
-		    Node child = this.offspring.get(offIndex);
-		    child.translate(translated);
-		    selfIndex += child.self.size();
-		}
-		else {
-		    switch(self.get(selfIndex)) {
+	    int index = 0;
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+		index += child.self.size();
+		if (index < self.size()) {
+		    switch(self.get(index)) {
 		    case "&&": {
 			translated.add(" and ");
 			break;
@@ -618,10 +608,14 @@ public class Node {
 			translated.add(" or ");
 			break;
 		    }
+		    default: {
+			translated.add(" " + self.get(index) + " ");
+			break;
 		    }
-		    selfIndex++;
+		    }
+		    index++;
 		}
-	    }
+	    }	
 	    break;
 	}
 	case "int": {
