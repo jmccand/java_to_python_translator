@@ -271,7 +271,7 @@ public class Node {
 	    break;
 	}
 	case "combination": {
-	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||"};
+	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "!=", "=="};
 	    int lastSplit = index;
 	    while (index < self.size()) {
 		if (self.get(index).equals("(")) {
@@ -497,12 +497,12 @@ public class Node {
 		index = 3;
 	    }
 	    else {
-		translated.add("\n  def " + self.get(2) + "(self, ");
+		translated.add("\n  def " + self.get(2) + "(self");
 		index = 2;
 	    }
 	    index += 3;
 	    if (!self.get(index).equals("{")) {
-		translated.add(self.get(index));
+		translated.add(", " + self.get(index));
 		index += 3;
 		while (!self.get(index - 2).equals(")")) {
 		    translated.add(", ");
@@ -511,8 +511,15 @@ public class Node {
 		}
 	    }
 	    translated.add("):\n");
-	    for (Node child : this.offspring) {
+	    index = 0;
+	    while (index < this.offspring.size()) {
+		Node child = this.offspring.get(index);
+		if (this.offspring.get(index).type.equals("do")) {
+		    this.offspring.get(index + 1).translate(translated);
+		    index++;
+		}
 		child.translate(translated);
+		index++;
 	    }
 	    break;
 	}
@@ -551,20 +558,89 @@ public class Node {
 	    if (this.indent != this.parent.indent) {
 		translated.add(doIndent());
 	    }
-	    translated.add(self.get(0) + "(");
-	    int index = 2;
-	    if (!self.get(index).equals(")")) {
-		translated.add(self.get(index));
-		index += 2;
-		while (!self.get(index - 1).equals(")")) {
+	    switch (self.get(0)) {
+	    case "while": {
+		translated.add(this.doIndent() + "first_while = True\n");
+		translated.add(this.doIndent() + "while first_while or ");
+		for (Node child : offspring) {
+		    System.out.println("while's offspring: " + child.type);
+		    child.translate(translated);
+		}
+		break;
+	    }
+	    case "System.out.print":
+	    case "System.out.println": {
+		translated.add("print(");
+		break;
+	    }
+	    default: {
+		translated.add(self.get(0) + "(");
+		break;
+	    }
+	    }
+	    if (this.offspring.size() > 0) {
+		this.offspring.get(0).translate(translated);
+		for (Node child : this.offspring.subList(1, this.offspring.size())) {
 		    translated.add(", ");
-		    translated.add(self.get(index));
-		    index += 2;
+		    child.translate(translated);
 		}
 	    }
 	    translated.add(")");
 	    if (this.indent != this.parent.indent) {
 		translated.add("\n");
+	    }
+	    break;
+	}
+	case "combination": {
+	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
+	    int selfIndex = 0;
+	    int offIndex = 0;
+	    if (self.get(0).equals("choice")) {
+		System.out.print("offspring of critical: " + this.offspring);
+	    }
+	    while (selfIndex < self.size() && offIndex < this.offspring.size()) {
+		if (!in(combinations, self.get(selfIndex))) {
+		    if (offIndex > 0 && offIndex < this.offspring.size() - 1) {
+			translated.add(" ");
+		    }
+		    Node child = this.offspring.get(offIndex);
+		    child.translate(translated);
+		    selfIndex += child.self.size();
+		}
+		else {
+		    switch(self.get(selfIndex)) {
+		    case "&&": {
+			translated.add(" and ");
+			break;
+		    }
+		    case "||": {
+			translated.add(" or ");
+			break;
+		    }
+		    }
+		    selfIndex++;
+		}
+	    }
+	    break;
+	}
+	case "int": {
+	    translated.add("" + self.get(0));
+	    break;
+	}
+	case "String": {
+	    translated.add("'" + self.get(0).substring(1, self.get(0).length() - 1) + "'");
+	    break;
+	}
+	case "do": {
+	    int index = 0;
+	    while (index < this.offspring.size()) {
+		Node child = this.offspring.get(index);
+		if (this.offspring.get(index).type.equals("do")) {
+		    this.offspring.get(index + 1).translate(translated);
+		    index++;
+		}
+		child.translate(translated);
+		index++;
 	    }
 	    break;
 	}
