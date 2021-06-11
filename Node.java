@@ -515,7 +515,8 @@ public class Node {
 	    index = 0;
 	    while (index < this.offspring.size()) {
 		Node child = this.offspring.get(index);
-		if (this.offspring.get(index).type.equals("do")) {
+		if (child.type.equals("do")) {
+		    System.out.println("do");
 		    this.offspring.get(index + 1).translate(translated);
 		    index++;
 		}
@@ -563,10 +564,11 @@ public class Node {
 	    case "while": {
 		translated.add(this.doIndent() + "first_while = True\n");
 		translated.add(this.doIndent() + "while first_while or ");
+		System.out.println("while's offspring: " + this.offspring.size());
 		for (Node child : offspring) {
-		    System.out.println("while's offspring: " + child.type);
 		    child.translate(translated);
 		}
+		translated.add("\n" + this.doIndent() + "  first_while = False");
 		break;
 	    }
 	    case "System.out.print":
@@ -579,7 +581,7 @@ public class Node {
 		break;
 	    }
 	    }
-	    if (this.offspring.size() > 0) {
+	    if (!self.get(0).equals("while") && this.offspring.size() > 0) {
 		this.offspring.get(0).translate(translated);
 		for (Node child : this.offspring.subList(1, this.offspring.size())) {
 		    translated.add(", ");
@@ -593,10 +595,15 @@ public class Node {
 	    break;
 	}
 	case "combination": {
+	    System.out.println("COMBINATION:\n" + self);
+	    System.out.println("offspring: " + offspring.size());
 	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
 	    int index = 0;
 	    for (Node child : this.offspring) {
+		//new Throwable().printStackTrace(System.out);
+		System.out.println("BEFORE translated: " + translated.subList(translated.size() - 5, translated.size()));
 		child.translate(translated);
+		System.out.println("AFTER translated: " + translated.subList(translated.size() - 5, translated.size()));
 		index += child.self.size();
 		if (index < self.size()) {
 		    switch(self.get(index)) {
@@ -638,6 +645,21 @@ public class Node {
 		index++;
 	    }
 	    break;
+	}
+	case "variable": {
+	    switch (this.identify(self.get(0))) {
+	    case 0: {
+		translated.add("self." + self.get(0));
+		break;
+	    }
+	    case 1: {
+		translated.add(this.className() + "." + self.get(0));
+		break;
+	    }
+	    case 2: {
+		translated.add(self.get(0));
+	    }
+	    }
 	}
 	}
     }
@@ -781,7 +803,11 @@ public class Node {
 	for (int repeat = 0; repeat < generation; repeat++) {
 	    spaces += "  ";
 	}
-	System.out.println(spaces + this.type/* + "   " + self.get(0)*/);
+	System.out.print(spaces + this.type/* + "   " + self.get(0)*/);
+	if (this.type.equals("call")) {
+	    System.out.print(" - " + self.get(0));
+	}
+	System.out.println();
 	for (Node child : this.offspring) {
 	    child.trace(generation + 1);
 	}
