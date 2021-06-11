@@ -516,7 +516,7 @@ public class Node {
 	    while (index < this.offspring.size()) {
 		Node child = this.offspring.get(index);
 		if (child.type.equals("do")) {
-		    System.out.println("do");
+		    //System.out.println("do");
 		    this.offspring.get(index + 1).translate(translated);
 		    index++;
 		}
@@ -562,13 +562,13 @@ public class Node {
 	    }
 	    switch (self.get(0)) {
 	    case "while": {
-		translated.add(this.doIndent() + "first_while = True\n");
+		translated.add("first_while = True\n");
 		translated.add(this.doIndent() + "while first_while or ");
-		System.out.println("while's offspring: " + this.offspring.size());
+		//System.out.println("while's offspring: " + this.offspring.size());
 		for (Node child : offspring) {
 		    child.translate(translated);
 		}
-		translated.add("\n" + this.doIndent() + "  first_while = False");
+		translated.add(":\n" + this.doIndent() + "  first_while = False");
 		break;
 	    }
 	    case "System.out.print":
@@ -588,22 +588,24 @@ public class Node {
 		    child.translate(translated);
 		}
 	    }
-	    translated.add(")");
+	    if (self.get(0).equals("while") == false) {
+		translated.add(")");
+	    }
 	    if (this.indent != this.parent.indent) {
 		translated.add("\n");
 	    }
 	    break;
 	}
 	case "combination": {
-	    System.out.println("COMBINATION:\n" + self);
-	    System.out.println("offspring: " + offspring.size());
+	    //System.out.println("COMBINATION:\n" + self);
+	    //System.out.println("offspring: " + offspring.size());
 	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
 	    int index = 0;
 	    for (Node child : this.offspring) {
 		//new Throwable().printStackTrace(System.out);
-		System.out.println("BEFORE translated: " + translated.subList(translated.size() - 5, translated.size()));
+		//System.out.println("BEFORE translated: " + translated.subList(translated.size() - 5, translated.size()));
 		child.translate(translated);
-		System.out.println("AFTER translated: " + translated.subList(translated.size() - 5, translated.size()));
+		//System.out.println("AFTER translated: " + translated.subList(translated.size() - 5, translated.size()));
 		index += child.self.size();
 		if (index < self.size()) {
 		    switch(self.get(index)) {
@@ -661,6 +663,9 @@ public class Node {
 	    }
 	    }
 	}
+	case "if": {
+	    
+	}
 	}
     }
 
@@ -700,16 +705,12 @@ public class Node {
 	    if (thisNode.variables.indexOf("attribute " + variable) != -1) {
 		return 0;
 	    }
-	    else {
-		if (thisNode.variables.indexOf("static " + variable) == -1) {
-		    System.out.println("SKETCHY VARIABLE: " + variable);
-		}
+	    else if (thisNode.variables.indexOf("static " + variable) != -1) {
 		return 1;
 	    }
+	    System.out.println("SKETCHY VARIABLE: " + variable);
 	}
-	else {
-	    return 2;
-	}
+	return 2;
     }
 
     private String className() {
