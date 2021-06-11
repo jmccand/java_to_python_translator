@@ -172,7 +172,17 @@ public class Node {
 		}
 		index++;
 	    }
-	    this.offspring.add(new Node("combination", this, self.subList(startIndex, index - 1), this.indent));
+	    if (this.type.equals("for") == false) {
+		this.offspring.add(new Node("combination", this, self.subList(startIndex, index - 1), this.indent));
+	    }
+	    else {
+		int semicolon1 = self.indexOf(";");
+		int semicolon2 = self.subList(semicolon1 + 1, self.size()).indexOf(";") + semicolon1;
+		this.offspring.add(new Node("declaration", this, self.subList(startIndex, semicolon1 + 1), this.indent));
+		this.offspring.add(new Node("combination", this, self.subList(semicolon1 + 1, semicolon2 + 1), this.indent));
+		this.offspring.add(new Node("reassignment", this, self.subList(semicolon2 + 1, index), this.indent));
+		
+	    }
 	}
 	case "constructor":
 	case "method":
@@ -686,14 +696,14 @@ public class Node {
 	    }
 	    }
 	}
-	case "if": {
-	    translated.add("if ");
-	    //translated.add(this.offspring.get(0).translate(translated));
+	    /*case "if": {
+	    translated.add("\nif ");
+	    translated.add(this.offspring.get(0).translate(translated));
 	    translated.add(":");
 	    for (Node child : offspring) {
 		child.translate(translated);
 	    }
-	}
+	    }*/
 	}
     }
 
