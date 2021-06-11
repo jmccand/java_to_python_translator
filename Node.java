@@ -153,14 +153,31 @@ public class Node {
 	    }
 	    break;
 	}
-	case "constructor":
-	case "method":
 	case "for":
 	case "if":
 	case "else if":
+	case "while": {
+	    while (self.get(index).equals("(") == false) {
+		index++;
+	    }
+	    index++;
+	    int startIndex = index;
+	    int parentheses = 1;
+	    while (parentheses > 0) {
+		if (self.get(index).equals("(")) {
+		    parentheses++;
+		}
+		else if (self.get(index).equals(")")) {
+		    parentheses--;
+		}
+		index++;
+	    }
+	    this.offspring.add(new Node("combination", this, self.subList(startIndex, index - 1), this.indent));
+	}
+	case "constructor":
+	case "method":
 	case "else":
 	case "do":
-	case "while":
 	case "try":
 	case "catch": {
 	    while (!self.get(index).equals("{")) {
@@ -271,7 +288,7 @@ public class Node {
 	    break;
 	}
 	case "combination": {
-	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "!=", "=="};
+	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!=", "<", ">", ">=", "<="};
 	    int lastSplit = index;
 	    while (index < self.size()) {
 		if (self.get(index).equals("(")) {
@@ -326,7 +343,7 @@ public class Node {
 
     private Node subline(int from, int to) {
 	//System.out.println("subline");
-	String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
+	String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!=", "<", ">", ">=", "<="};
 	int index;
 	boolean stripped = false;
 	while (!stripped) {
@@ -374,6 +391,7 @@ public class Node {
 		    }
 		}
 		else if (in(combinations, self.get(index))) {
+		    //System.out.println(self);
 		    return new Node("combination", this, self.subList(from, to), this.indent);
 		}
 		else {
@@ -576,6 +594,11 @@ public class Node {
 		translated.add("print(");
 		break;
 	    }
+	    case ".nextInt": {
+		System.out.println("NEXT INT!!!");
+		translated.add("input(");
+		break;
+	    }
 	    default: {
 		translated.add(self.get(0) + "(");
 		break;
@@ -599,7 +622,7 @@ public class Node {
 	case "combination": {
 	    //System.out.println("COMBINATION:\n" + self);
 	    //System.out.println("offspring: " + offspring.size());
-	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!="};
+	    String[] combinations = {"+", "-", "*", "/", "%", "&&", "||", "==", "!=", "<", ">", ">=", "<="};
 	    int index = 0;
 	    for (Node child : this.offspring) {
 		//new Throwable().printStackTrace(System.out);
@@ -664,7 +687,12 @@ public class Node {
 	    }
 	}
 	case "if": {
-	    
+	    translated.add("if ");
+	    //translated.add(this.offspring.get(0).translate(translated));
+	    translated.add(":");
+	    for (Node child : offspring) {
+		child.translate(translated);
+	    }
 	}
 	}
     }
