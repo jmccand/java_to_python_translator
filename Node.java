@@ -604,13 +604,14 @@ public class Node {
 		translated.add("print(");
 		break;
 	    }
-	    case ".nextInt": {
-		System.out.println("NEXT INT!!!");
-		translated.add("input(");
-		break;
-	    }
 	    default: {
-		translated.add(self.get(0) + "(");
+		String callto = self.get(0);
+		if (callto.length() > 8 && callto.substring(callto.length() - 8, callto.length()).equals("nextInt")) {
+		    translated.add("input(");
+		}
+		else {
+		    translated.add(callto + "(");
+		}
 		break;
 	    }
 	    }
@@ -695,15 +696,25 @@ public class Node {
 		translated.add(self.get(0));
 	    }
 	    }
+	    break;
 	}
-	    /*case "if": {
-	    translated.add("\nif ");
-	    translated.add(this.offspring.get(0).translate(translated));
-	    translated.add(":");
+	case "if":
+	case "else if": {
+	    //System.out.println("IF:\n" + self);
+	    translated.add(this.doIndent() + this.type + " ");
+	    this.offspring.get(0).translate(translated);
+	    translated.add(":\n");
+	    for (Node child : offspring.subList(1, offspring.size())) {
+		child.translate(translated);
+	    }
+	    break;
+	}
+	case "else": {
+	    translated.add(this.doIndent() + "else:\n");
 	    for (Node child : offspring) {
 		child.translate(translated);
 	    }
-	    }*/
+	}
 	}
     }
 
