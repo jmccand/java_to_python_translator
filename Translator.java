@@ -39,7 +39,9 @@ public class Translator {
 	    }
 	    lexed = clean(lexed);
 	    Node program = new Node("program", lexed, 0);
-	    write(lexed);
+	    List<String> translated = new ArrayList<String>();
+	    program.translate(translated);
+	    write(translated);
 	}
 	catch (FileNotFoundException ex) {
 	    System.out.println("Cannot find " + ogJava + ", terminating the program");
@@ -73,6 +75,10 @@ public class Translator {
 	if ((!evaluation) && total.length() - 1 > 0) {
 	    total = total.substring(0, total.length() - 1);
 	}
+        //System.out.println("\"" + total + "\"");
+        if (total.equals("- ")) {
+            System.out.println("FOUND the '- '!!!");
+        }
 	return total;
     }
 
@@ -102,6 +108,7 @@ public class Translator {
     }
 
     private static List<String> clean(List<String> original) {
+        //System.out.println(original);
 	String larger = "";
 	List<String> cleaned = new ArrayList<String>();
 	int index = 0;
@@ -138,10 +145,10 @@ public class Translator {
 		larger += (original.get(index) + original.get(index + 1));
 		index += 2;
 	    }
-	    else if (original.get(index).equals("-")) {
+	    else if (original.get(index).equals("-") && isInt(original.get(index + 1))) {
 		larger += "-" + original.get(index + 1);
 		index += 2;
-	    }
+            }
 	    else {
 		larger = original.get(index);
 		index++;
@@ -154,6 +161,7 @@ public class Translator {
 	if (index < original.size()) {
 	    cleaned.add(original.get(index));
 	}
+        //System.out.println(cleaned);
 	return cleaned;
     }
 
@@ -164,31 +172,6 @@ public class Translator {
 	    }
 	}
 	return false;
-    }
-
-    private static List<String> toPython(List<String> original) {
-	List<String> translated = new ArrayList<String>();
-	for (int index = 0; index < original.size(); index++) {
-	    String token = original.get(index);
-	    String[] smarts = smartTranslate(token);
-	    String pythoned = smarts[1];
-      
-	    translated.add(pythoned);
-	}
-	return translated;
-    }
-
-    private static String[] smartTranslate(String original) {
-	switch (original) {
-	case "System.out.println":
-	    return new String[] {"0", "print"};
-	case "private":
-	case "public":
-	case "static":
-	    return new String[] {"0", ""};
-	default:
-	    return new String[] {"0", original};
-	}
     }
 
     private void write(List<String> source) {
@@ -207,5 +190,20 @@ public class Translator {
 	    System.out.println("Cannot find " + pythonFile + ", terminating the program");
 	    System.exit(1);
 	}
+    }
+    
+    private static boolean isInt(String og) {
+	int start = 0;
+	if (og.substring(0, 1).equals("-")) {
+	    start++;
+	}
+	for (int index = start; index < og.length(); index++) {
+	    char thisChar = og.charAt(index);
+	    int ascii = (int)thisChar;
+	    if (!(ascii >= 48 && ascii <= 57)) {
+		return false;
+	    }
+	}
+	return true;
     }
 }
