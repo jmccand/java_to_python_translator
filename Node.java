@@ -189,6 +189,8 @@ public class Node {
 	case "else":
 	case "do":
 	case "try":
+	case "case":
+	case "default":
 	case "catch": {
 	    while (!self.get(index).equals("{")) {
 		index++;
@@ -214,7 +216,7 @@ public class Node {
 		    if (startLine + 1 < index) {
 			String[] declarations = {"=", "++", "--", "+=", "-=", "*=", "/="};
 			String[] types = {"int", "boolean", "char", "String", "double"};
-			String[] spaced_methods = {"return"};
+			String[] spaced_methods = {"return", "break"};
 			if (in(declarations, self.get(startLine + 1))) {
 			    this.offspring.add(new Node("reassignment", this, self.subList(startLine, index), this.indent + 1));
 			}
@@ -254,6 +256,7 @@ public class Node {
 	    break;
 	}
 	case "call": {
+	    //System.out.println(self);
 	    while (!self.get(index).equals("(")) {
 		index++;
 	    }
@@ -346,6 +349,31 @@ public class Node {
 		variable = self.get(2);
 	    }
 	    this.addVariable(variable);
+	    break;
+	}
+	case "switch": {
+	    while (self.subList(index, self.size()).indexOf("case") != -1) {
+		index += self.subList(index + 1, self.size()).indexOf("case") + 1;
+		//System.out.println(index + " - " + self.get(index));
+		int nextCase = self.subList(index + 1, self.size()).indexOf("case") + index + 1;
+		//System.out.println("  " + nextCase + " - " + self.get(nextCase));
+		if (nextCase != index) {
+		    this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent + 1));
+		}
+		else {
+		    nextCase = self.indexOf("default");
+		    if (nextCase > index) {
+			this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent + 1));
+		    }
+		    else {
+			this.offspring.add(new Node("case", this, self.subList(index, self.size() - 1), this.indent + 1));
+		    }
+		    index = self.size();
+		}
+	    }
+	    if (self.indexOf("default") != -1) {
+		this.offspring.add(new Node("default", this, self.subList(self.indexOf("default"), self.size()), this.indent + 1));
+	    }
 	    break;
 	}
 	}
@@ -726,7 +754,7 @@ public class Node {
 	    translated.add(", ");
 	    thisOffspring.get(1).offspring.get(0).translate(translated);
 	    translated.add(", ");
-	    System.out.println("for loop 3rd offspring: " + thisOffspring.get(2).self);
+	    //System.out.println("for loop 3rd offspring: " + thisOffspring.get(2).self);
 	    switch (thisOffspring.get(2).self.get(1)) {
 	    case "++": {
 		translated.add("1");
@@ -882,8 +910,19 @@ public class Node {
 	    spaces += "  ";
 	}
 	System.out.print(spaces + this.type/* + "   " + self.get(0)*/);
-	if (this.type.equals("call")) {
+	switch (this.type) {
+	case "call": {
 	    System.out.print(" - " + self.get(0));
+	    break;
+	}
+	case "case": {
+	    System.out.print(" - " + self.get(1));
+	    break;
+	}
+	case "space-call": {
+	    System.out.print(" - " + self.get(0));
+	    break;
+	}
 	}
 	System.out.println();
 	for (Node child : this.offspring) {
