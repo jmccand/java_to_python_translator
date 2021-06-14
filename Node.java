@@ -787,8 +787,17 @@ public class Node {
 	    }
 	    break;
 	}
+	case "while": {
+	    translated.add(this.doIndent() + "while ");
+	    this.offspring.get(0).translate(translated);
+	    translated.add(":\n");
+	    for (Node child : offspring.subList(1, offspring.size())) {
+		child.translate(translated);
+	    }
+	    break;
+	}
 	case "switch": {
-	    System.out.println("SWITCH:\n" + self);
+	    //System.out.println("SWITCH:\n" + self);
 	    translated.add(this.doIndent() + "switch_object = ");
 	    this.offspring.get(0).translate(translated);
 	    translated.add("\n");
@@ -798,7 +807,7 @@ public class Node {
 	    break;
 	}
 	case "case": {
-	    System.out.println("CASE:\n" + self);
+	    //System.out.println("CASE:\n" + self);
 	    translated.add(this.doIndent());
 	    if (this.parent.offspring.get(1) == this) {
 		translated.add("if");
