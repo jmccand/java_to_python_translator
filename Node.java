@@ -180,7 +180,7 @@ public class Node {
 		int semicolon2 = self.subList(semicolon1 + 1, self.size()).indexOf(";") + semicolon1;
 		this.offspring.add(new Node("declaration", this, self.subList(startIndex, semicolon1 + 1), this.indent));
 		this.offspring.add(new Node("combination", this, self.subList(semicolon1 + 1, semicolon2 + 1), this.indent));
-		this.offspring.add(new Node("reassignment", this, self.subList(semicolon2 + 1, index), this.indent));
+		this.offspring.add(new Node("reassignment", this, self.subList(semicolon2 + 2, index), this.indent));
 		
 	    }
 	}
@@ -714,6 +714,34 @@ public class Node {
 	    for (Node child : offspring) {
 		child.translate(translated);
 	    }
+	    break;
+	}
+	case "for": {
+	    translated.add(this.doIndent());
+	    translated.add("for ");
+	    translated.add(self.get(3));
+	    translated.add(" in range(");
+	    List<Node> thisOffspring = this.offspring;
+	    thisOffspring.get(0).offspring.get(0).translate(translated);
+	    translated.add(", ");
+	    thisOffspring.get(1).offspring.get(0).translate(translated);
+	    translated.add(", ");
+	    System.out.println("for loop 3rd offspring: " + thisOffspring.get(2).self);
+	    switch (thisOffspring.get(2).self.get(1)) {
+	    case "++": {
+		translated.add("1");
+		break;
+	    }
+	    case "--": {
+		translated.add("-1");
+		break;
+	    }
+	    }
+	    translated.add("):\n");
+	    for (Node child : offspring.subList(3, offspring.size())) {
+		child.translate(translated);
+	    }
+	    break;
 	}
 	}
     }
