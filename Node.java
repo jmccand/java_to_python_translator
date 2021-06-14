@@ -352,27 +352,43 @@ public class Node {
 	    break;
 	}
 	case "switch": {
+	    while (self.get(index).equals("(") == false) {
+		index++;
+	    }
+	    index++;
+	    int startIndex = index;
+	    int parentheses = 1;
+	    while (parentheses > 0) {
+		if (self.get(index).equals("(")) {
+		    parentheses++;
+		}
+		else if (self.get(index).equals(")")) {
+		    parentheses--;
+		}
+		index++;
+	    }
+	    this.offspring.add(this.subline(startIndex, index - 1));
 	    while (self.subList(index, self.size()).indexOf("case") != -1) {
 		index += self.subList(index + 1, self.size()).indexOf("case") + 1;
 		//System.out.println(index + " - " + self.get(index));
 		int nextCase = self.subList(index + 1, self.size()).indexOf("case") + index + 1;
 		//System.out.println("  " + nextCase + " - " + self.get(nextCase));
 		if (nextCase != index) {
-		    this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent + 1));
+		    this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent));
 		}
 		else {
 		    nextCase = self.indexOf("default");
 		    if (nextCase > index) {
-			this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent + 1));
+			this.offspring.add(new Node("case", this, self.subList(index, nextCase), this.indent));
 		    }
 		    else {
-			this.offspring.add(new Node("case", this, self.subList(index, self.size() - 1), this.indent + 1));
+			this.offspring.add(new Node("case", this, self.subList(index, self.size() - 1), this.indent));
 		    }
 		    index = self.size();
 		}
 	    }
 	    if (self.indexOf("default") != -1) {
-		this.offspring.add(new Node("default", this, self.subList(self.indexOf("default"), self.size()), this.indent + 1));
+		this.offspring.add(new Node("default", this, self.subList(self.indexOf("default"), self.size()), this.indent));
 	    }
 	    break;
 	}
@@ -767,6 +783,31 @@ public class Node {
 	    }
 	    translated.add("):\n");
 	    for (Node child : offspring.subList(3, offspring.size())) {
+		child.translate(translated);
+	    }
+	    break;
+	}
+	case "switch": {
+	    System.out.println("SWITCH:\n" + self);
+	    translated.add(this.doIndent() + "switch_object = ");
+	    this.offspring.get(0).translate(translated);
+	    translated.add("\n");
+	    for (Node child : offspring.subList(1, offspring.size())) {
+		child.translate(translated);
+	    }
+	    break;
+	}
+	case "case": {
+	    System.out.println("CASE:\n" + self);
+	    translated.add(this.doIndent());
+	    if (this.parent.offspring.get(1) == this) {
+		translated.add("if");
+	    }
+	    else {
+		translated.add("elif");
+	    }
+	    translated.add(" switch_object == " + self.get(1) + ":\n");
+	    for (Node child : offspring) {
 		child.translate(translated);
 	    }
 	    break;
