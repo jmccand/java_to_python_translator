@@ -618,9 +618,19 @@ public class Node {
 		translated.add(self.get(0));
 	    }
 	    }
-	    translated.add(" = ");
-	    for (Node child : this.offspring) {
-		child.translate(translated);
+	    if (this.offspring.size() > 0) {
+		translated.add(" = ");
+		for (Node child : this.offspring) {
+		    child.translate(translated);
+		}
+	    }
+	    else {
+		if (self.get(1).equals("++")) {
+		    translated.add(" += 1");
+		}
+		else {
+		    translated.add(" -= 1");
+		}
 	    }
 	    translated.add("\n");
 	    break;
