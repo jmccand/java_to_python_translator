@@ -775,8 +775,13 @@ public class Node {
 	case "if":
 	case "else if": {
 	    //System.out.println("IF:\n" + self);
-	    translated.add(this.doIndent() + this.type + " ");
-	    this.offspring.get(0).translate(translated);
+            if (this.type.equals("else if") == false) {
+                translated.add(this.doIndent() + this.type + " ");
+            }
+            else {
+                translated.add(this.doIndent() + "elif ");
+            }
+            this.offspring.get(0).translate(translated);
 	    translated.add(":\n");
 	    for (Node child : offspring.subList(1, offspring.size())) {
 		child.translate(translated);
