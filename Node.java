@@ -628,8 +628,13 @@ public class Node {
 	case "declaration": {
 	    translated.add(this.doIndent());
 	    translated.add(self.get(1) + " = ");
-	    for (Node child : this.offspring) {
-		child.translate(translated);
+	    if (this.offspring.size() > 0) {
+		for (Node child : this.offspring) {
+		    child.translate(translated);
+		}
+	    }
+	    else {
+		translated.add("None");
 	    }
 	    translated.add("\n");
 	    break;
