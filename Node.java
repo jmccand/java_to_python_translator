@@ -678,14 +678,13 @@ public class Node {
 		translated.add("print(");
 		break;
 	    }
+	    case "input.nextInt": {
+		translated.add("input(");
+		break;
+	    }
 	    default: {
-		String callto = self.get(0);
-		if (callto.length() > 8 && callto.substring(callto.length() - 8, callto.length()).equals("nextInt")) {
-		    translated.add("input(");
-		}
-		else {
-		    translated.add(callto + "(");
-		}
+		translated.add(self.get(0));
+		translated.add("(");
 		break;
 	    }
 	    }
