@@ -192,13 +192,23 @@ public class Node {
 	case "case":
 	case "default":
 	case "catch": {
+	    if (this.type.equals("if")) {
+		System.out.println("if: " + self);
+		System.out.println("  " + index);
+	    }
 	    while (!self.get(index).equals("{")) {
 		index++;
 	    }
 	    index++;
+	    if (this.type.equals("if")) {
+		System.out.println("  " + index);
+	    }
 	    while (index < self.size() - 1) {
 		int startLine = index;
 		//System.out.println(self.get(startLine));
+		if (this.type.equals("if")) {
+		    System.out.println("  " + index);
+		}
 		while (!(self.get(index).equals("{") || self.get(index).equals("\n"))) {
 		    index++;
 		}
