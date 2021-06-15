@@ -871,6 +871,14 @@ public class Node {
 	    }
 	    break;
 	}
+	case "boolean": {
+	    if (self.get(0).equals("true")) {
+		translated.add("True");
+	    }
+	    else {
+		translated.add("False");
+	    }
+	}
 	}
     }
 
