@@ -192,23 +192,13 @@ public class Node {
 	case "case":
 	case "default":
 	case "catch": {
-	    if (this.type.equals("if")) {
-		System.out.println("if: " + self);
-		System.out.println("  " + index);
-	    }
 	    while (!self.get(index).equals("{")) {
 		index++;
 	    }
 	    index++;
-	    if (this.type.equals("if")) {
-		System.out.println("  " + index);
-	    }
 	    while (index < self.size() - 1) {
 		int startLine = index;
 		//System.out.println(self.get(startLine));
-		if (this.type.equals("if")) {
-		    System.out.println("  " + index);
-		}
 		while (!(self.get(index).equals("{") || self.get(index).equals("\n"))) {
 		    index++;
 		}
@@ -399,6 +389,12 @@ public class Node {
 	    }
 	    if (self.indexOf("default") != -1) {
 		this.offspring.add(new Node("default", this, self.subList(self.indexOf("default"), self.size()), this.indent));
+	    }
+	    break;
+	}
+	case "space-call": {
+	    if (self.size() > 2) {
+		this.offspring.add(this.subline(1, self.size() - 1));
 	    }
 	    break;
 	}
@@ -629,6 +625,15 @@ public class Node {
 	    translated.add("\n");
 	    break;
 	}
+	case "declaration": {
+	    translated.add(this.doIndent());
+	    translated.add(self.get(1) + " = ");
+	    for (Node child : this.offspring) {
+		child.translate(translated);
+	    }
+	    translated.add("\n");
+	    break;
+	}
 	case "new": {
 	    switch (self.get(1)) {
 	    default: {
@@ -715,6 +720,7 @@ public class Node {
 	    }	
 	    break;
 	}
+	case "double":
 	case "int": {
 	    translated.add("" + self.get(0));
 	    break;
@@ -829,6 +835,20 @@ public class Node {
 	    for (Node child : offspring) {
 		child.translate(translated);
 	    }
+	    break;
+	}
+	case "space-call": {
+	    translated.add(this.doIndent());
+	    switch (self.get(0)) {
+	    case "return": {
+		translated.add("return ");
+		break;
+	    }
+	    }
+	    for (Node child : offspring) {
+		child.translate(translated);
+	    }
+	    translated.add("\n");
 	    break;
 	}
 	}
@@ -971,6 +991,7 @@ public class Node {
 	}
 	System.out.print(spaces + this.type/* + "   " + self.get(0)*/);
 	switch (this.type) {
+	case "space-call":
 	case "call": {
 	    System.out.print(" - " + self.get(0));
 	    break;
@@ -979,8 +1000,14 @@ public class Node {
 	    System.out.print(" - " + self.get(1));
 	    break;
 	}
-	case "space-call": {
-	    System.out.print(" - " + self.get(0));
+	case "method": {
+	    System.out.print(" - ");
+	    if (self.get(1).equals("static")) {
+		System.out.print(self.get(3));
+	    }
+	    else {
+		System.out.print(self.get(2));
+	    }
 	    break;
 	}
 	}
