@@ -851,6 +851,21 @@ public class Node {
 	    translated.add("\n");
 	    break;
 	}
+	case "typecast": {
+	    if (this.indent != this.parent.indent) {
+		translated.add(this.doIndent());
+	    }
+	    translated.add(self.get(1));
+	    translated.add("(");
+	    for (Node child : offspring) {
+		child.translate(translated);
+	    }
+	    translated.add(")");
+	    if (this.indent != this.parent.indent) {
+		translated.add("\n");
+	    }
+	    break;
+	}
 	}
     }
 
